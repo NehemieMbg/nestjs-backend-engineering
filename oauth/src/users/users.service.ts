@@ -14,9 +14,7 @@ export class UsersService {
   ) {}
 
   async createUser(body: CreateUserDto): Promise<User | null> {
-    const existingUser = await this.userRepository.findOne({
-      where: { username: body.username },
-    });
+    const existingUser = await this.findOne(body.username);
 
     if (existingUser) {
       return null;
@@ -33,5 +31,11 @@ export class UsersService {
     await this.userRepository.save(user);
 
     return user;
+  }
+
+  async findOne(username: string) {
+    return await this.userRepository.findOne({
+      where: { username },
+    });
   }
 }

@@ -3,8 +3,21 @@ POST http://localhost:3000/auth/sign-up
 Content-Type: application/json
 
 {
-  "firstName": "Naomie",
-  "lastName": "Liu",
+  "firstName": "Nehemie",
+  "lastName": "Mombanga",
+  "username": "6nehemie@test.com",
+  "password": "testtest"
+}
+
+### Sign in user
+POST http://localhost:3000/auth/sign-in
+Content-Type: application/json
+
+{
   "username": "6naomie@test.com",
   "password": "testtest"
 }
+
+### Get current user
+GET http://localhost:3000/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiNm5hb21pZUB0ZXN0LmNvbSIsImlhdCI6MTcyNDYwODI0NSwiZXhwIjoxNzI0Njk0NjQ1fQ.EfXeCtFV5kLrxRi1M1Zh60Uwkx0-1SQ-hxh7yPq6fCI
