@@ -1,15 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from '../users/password.service';
 import { AuthDto } from './dto/auth.dto';
 import { User } from '../users/user.entity';
-import { GoogleProfile } from './strategy/google.strategy';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +14,11 @@ export class AuthService {
     private readonly passwordService: PasswordService,
   ) {}
 
+  /**
+   * Create a new user
+   * @param body - The user data
+   * @returns The user info and access token
+   */
   async signup(body: CreateUserDto): Promise<AuthDto> {
     const user = await this.userService.createUser(body);
 
@@ -35,6 +35,11 @@ export class AuthService {
     };
   }
 
+  /**
+   * Sign in a user
+   * @param user - The user info
+   * @returns The user info and access token
+   */
   async signIn(user: User): Promise<AuthDto> {
     const accessToken = await this.generateToken(user.id, user.username);
 
@@ -45,6 +50,12 @@ export class AuthService {
     };
   }
 
+  /**
+   * Validate a user who is trying to sign in
+   * @param username - The username of the user
+   * @param password - The password of the user
+   * @returns The user info and access
+   */
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.findOne(username);
 
@@ -58,6 +69,11 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Sign in a user using Google OAuth and create a new user if they don't exist
+   * @param request - The request object
+   * @returns The user info and access token
+   */
   async googleSignIn(request): Promise<any> {
     if (!request.user) {
       return null;

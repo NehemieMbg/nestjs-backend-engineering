@@ -31,6 +31,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
+  /**
+   * This method is called to validate the user with Google.
+   * @param accessToken - The access token provided by Google
+   * @param refreshToken - The refresh token provided by Google
+   * @param profile - The user's profile provided by Google
+   * @param done - The callback function that will be called with the user's profile
+   */
   async validate(
     accessToken: string,
     refreshToken: string,

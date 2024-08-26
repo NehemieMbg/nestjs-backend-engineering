@@ -15,6 +15,11 @@ export class UsersService {
     private readonly passwordService: PasswordService,
   ) {}
 
+  /**
+   * Create a new user
+   * @param body - The user data
+   * @return The created user
+   */
   async createUser(body: CreateUserDto): Promise<User | null> {
     const existingUser = await this.findOne(body.username);
 
@@ -35,6 +40,11 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Create a new user using OAuth
+   * @param body - The user data
+   * @return The created user
+   */
   async createUserOauth(body: GoogleAuthDto): Promise<User | null> {
     const existingUser = await this.findOne(body.email);
 
@@ -51,6 +61,11 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Find a user by username
+   * @param username - The username
+   * @return The user
+   */
   async findOne(username: string) {
     return await this.userRepository.findOne({
       where: { username },

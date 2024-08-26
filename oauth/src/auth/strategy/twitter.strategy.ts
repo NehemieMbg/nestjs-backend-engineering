@@ -31,6 +31,13 @@ export class TwitterStrategy extends PassportStrategy(Strategy, 'twitter') {
     });
   }
 
+  /**
+   * This method is called to validate the user with Twitter.
+   * @param accessToken - The access token provided by Twitter
+   * @param refreshToken - The refresh token provided by Twitter
+   * @param profile - The user's profile provided by Twitter
+   * @param done - The callback function that will be called with the user's profile
+   */
   async validate(
     accessToken: string,
     refreshToken: string,
