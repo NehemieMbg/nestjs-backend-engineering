@@ -14,14 +14,14 @@ export class User {
   @Column()
   username: string;
 
-  @Column()
+  @Column({ nullable: true }) // for oauth
   password: string;
 
   constructor(
     firstName: string,
     lastName: string,
     username: string,
-    password: string,
+    password?: string,
   ) {
     this.firstName = firstName;
     this.lastName = lastName;

@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from '../users/password.service';
 import { AuthDto } from './dto/auth.dto';
 import { User } from '../users/user.entity';
+import { GoogleProfile } from './strategy/google.strategy';
 
 @Injectable()
 export class AuthService {
@@ -55,6 +56,21 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  async googleSignIn(request): Promise<any> {
+    if (!request.user) {
+      return null;
+    }
+
+    const { email: username } = request.user;
+    let user = await this.userService.findOne(username);
+
+    if (!user) {
+      user = await this.userService.createUserOauth(request.user);
+    }
+
+    return this.signIn(user);
   }
 
   /**
