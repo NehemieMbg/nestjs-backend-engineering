@@ -70,8 +70,8 @@ export class AuthController {
   @Post('/request-password-reset')
   async requestPasswordReset(
     @Body() body: RequestPasswordResetDto,
-  ): Promise<void> {
-    await this.authService.requestPasswordReset(body.email);
+  ): Promise<{ message: string }> {
+    return await this.authService.requestPasswordReset(body.email);
   }
 
   @Post('/reset-password')
@@ -79,10 +79,11 @@ export class AuthController {
   async resetPassword(
     @Request() request,
     @Body() body: ResetPasswordDto,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     return await this.authService.resetPassword(
-      request.user.email,
+      request.user.username,
       body.newPassword,
+      body.resetToken,
     );
   }
 }

@@ -62,6 +62,8 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.findOne(username);
 
+    if (!user.password) return null;
+
     if (
       user &&
       (await this.passwordService.compare(password, user?.password))
@@ -97,7 +99,7 @@ export class AuthService {
    * @param email The email to send the reset password email to
    * @returns Whether the email was sent successfully
    */
-  async requestPasswordReset(email: string): Promise<void> {
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
     const user = await this.userService.findOne(email);
 
     if (!user) {
@@ -118,15 +120,47 @@ export class AuthService {
       'Reset Password',
       'Click here to reset your password: ' + resetUrl,
     );
+
+    return { message: 'Password reset request has been accepted' };
   }
 
-  async resetPassword(username: string, newPassword: string): Promise<void> {
+  /**
+   * Reset a user's password
+   * @param username - The username of the user
+   * @param newPassword - The new password
+   * @param resetToken - The reset token
+   * @returns A message indicating whether the password was reset successfully
+   */
+  async resetPassword(
+    username: string,
+    newPassword: string,
+    resetToken: string,
+  ): Promise<{ message: string }> {
     const user = await this.userService.findOne(username);
 
-    //! check for access token same as the one in db
+    // if no token created in db
+    if (!user.resetPasswordExpires) {
+      throw new BadRequestException('Invalid reset token');
+    }
+
+    // check if too late to initiate password reset
+    if (user.resetPasswordExpires < new Date()) {
+      throw new BadRequestException('Reset token has expired');
+    }
+
+    // compare the current token with the on stored in db
+    if (
+      !(await this.passwordService.compare(resetToken, user.resetPasswordToken))
+    ) {
+      throw new BadRequestException('Invalid reset token');
+    }
 
     user.password = await this.passwordService.encode(newPassword);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
     await this.userService.saveUser(user);
+
+    return { message: 'Password successfully updated' };
   }
 
   /**

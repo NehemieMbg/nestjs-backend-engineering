@@ -17,7 +17,7 @@ POST http://localhost:3000/auth/sign-in
 Content-Type: application/json
 
 {
-  "username": "nehemie.mbg@gmail.com",
+  "username": "test@test.com",
   "password": "testtest"
 }
 
@@ -35,7 +35,8 @@ Content-Type: application/json
 Authorization: Bearer
 
 {
-  "newPassword": "6nehemie"
+  "resetToken": "",
+  "newPassword": "testtest"
 }
 
 
