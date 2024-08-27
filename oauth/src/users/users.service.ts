@@ -71,4 +71,13 @@ export class UsersService {
       where: { username },
     });
   }
+
+  /**
+   * Sate given user to the database
+   * @param user - The user object to be saved
+   * @returns The updated user
+   */
+  async saveUser(user: User) {
+    return await this.userRepository.save(user);
+  }
 }

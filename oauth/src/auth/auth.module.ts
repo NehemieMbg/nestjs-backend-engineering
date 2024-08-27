@@ -10,11 +10,13 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
 import { TwitterStrategy } from './strategy/twitter.strategy';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    EmailModule, // Ensure EmailModule is imported
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

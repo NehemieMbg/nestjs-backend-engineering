@@ -5,12 +5,15 @@ import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from '../users/password.service';
 import { AuthDto } from './dto/auth.dto';
 import { User } from '../users/user.entity';
+import { EmailService } from '../email/email.service';
+import * as process from 'node:process';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
     private readonly passwordService: PasswordService,
   ) {}
 
@@ -90,13 +93,55 @@ export class AuthService {
   }
 
   /**
+   * Send a reset password email
+   * @param email The email to send the reset password email to
+   * @returns Whether the email was sent successfully
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.userService.findOne(email);
+
+    if (!user) {
+      throw new BadRequestException('User does not exist');
+    }
+
+    const resetToken = await this.generateToken(user.id, user.username, '1h');
+
+    user.resetPasswordToken = await this.passwordService.encode(resetToken);
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+    await this.userService.saveUser(user);
+
+    const resetUrl = `http://yourfrontend.com/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendEmail(
+      process.env.RESEND_EMAIL,
+      email,
+      'Reset Password',
+      'Click here to reset your password: ' + resetUrl,
+    );
+  }
+
+  async resetPassword(username: string, newPassword: string): Promise<void> {
+    const user = await this.userService.findOne(username);
+
+    //! check for access token same as the one in db
+
+    user.password = await this.passwordService.encode(newPassword);
+    await this.userService.saveUser(user);
+  }
+
+  /**
    * Generate a jwt token
    * @param id - The user id
    * @param username - The username of the user
    * @returns generated token
    */
-  private async generateToken(id: number, username: string): Promise<string> {
+  private async generateToken(
+    id: number,
+    username: string,
+    expireIn?: string,
+  ): Promise<string> {
     const payload = { sub: id, username: username };
-    return await this.jwtService.signAsync(payload);
+    const options = { expiresIn: expireIn || '1d' };
+    return await this.jwtService.signAsync(payload, options);
   }
 }

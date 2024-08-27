@@ -17,10 +17,28 @@ POST http://localhost:3000/auth/sign-in
 Content-Type: application/json
 
 {
-  "username": "6naomie@test.com",
+  "username": "nehemie.mbg@gmail.com",
   "password": "testtest"
 }
 
+### Initiate User Password Reset
+POST http://localhost:3000/auth/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "nehemie.mbg@gmail.com"
+}
+
+### Update User password
+POST http://localhost:3000/auth/reset-password
+Content-Type: application/json
+Authorization: Bearer
+
+{
+  "newPassword": "6nehemie"
+}
+
+
 ### Get current user
 GET http://localhost:3000/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsInVzZXJuYW1lIjoibmVoZW1pZS5tYmdAZ21haWwuY29tIiwiaWF0IjoxNzI0NjYxNzc2LCJleHAiOjE3MjQ3NDgxNzZ9.c8Br38oENgbIoUgqaDOtRviasdgA7KNTQRQJKvlwMkQ
+Authorization: Bearer 

@@ -13,6 +13,8 @@ import { AuthDto } from './dto/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -63,5 +65,24 @@ export class AuthController {
   @UseGuards(GoogleOAuthGuard)
   googleAuthRedirect(@Request() request) {
     return this.authService.googleSignIn(request);
+  }
+
+  @Post('/request-password-reset')
+  async requestPasswordReset(
+    @Body() body: RequestPasswordResetDto,
+  ): Promise<void> {
+    await this.authService.requestPasswordReset(body.email);
+  }
+
+  @Post('/reset-password')
+  @UseGuards(JwtAuthGuard)
+  async resetPassword(
+    @Request() request,
+    @Body() body: ResetPasswordDto,
+  ): Promise<void> {
+    return await this.authService.resetPassword(
+      request.user.email,
+      body.newPassword,
+    );
   }
 }

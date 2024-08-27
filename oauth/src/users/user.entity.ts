@@ -17,6 +17,12 @@ export class User {
   @Column({ nullable: true }) // for oauth
   password: string;
 
+  @Column({ nullable: true })
+  resetPasswordToken?: string;
+
+  @Column({ nullable: true })
+  resetPasswordExpires?: Date;
+
   constructor(
     firstName: string,
     lastName: string,
