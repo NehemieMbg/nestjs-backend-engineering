@@ -20,7 +20,12 @@ export class EmailService {
    * @param text - The text content of the email.
    * @throws InternalServerErrorException if there is an error sending the email.
    */
-  async sendEmail(from: string, to: string, subject: string, text: string) {
+  async sendEmail(
+    from: string,
+    to: string,
+    subject: string,
+    text: string,
+  ): Promise<void> {
     const { error } = await this.resend.emails.send({
       from: `${process.env.EMAIL_NAME} <${from}>`,
       to,
