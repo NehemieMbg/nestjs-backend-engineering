@@ -18,18 +18,22 @@ export class AuthService {
   ) {}
 
   /**
-   * Create a new user
-   * @param body - The user data
-   * @returns The user info and access token
+   * Registers a new user.
+   * @param body - The user data.
+   * @returns A promise that resolves to the user info and access token.
+   * @throws BadRequestException if the user already exists.
    */
   async signup(body: CreateUserDto): Promise<AuthDto> {
-    const user = await this.userService.createUser(body);
+    const user: User | null = await this.userService.createUser(body);
 
     if (!user) {
       throw new BadRequestException('User already exists');
     }
 
-    const accessToken = await this.generateToken(user.id, user.username);
+    const accessToken: string = await this.generateToken(
+      user.id,
+      user.username,
+    );
 
     return {
       id: user.id,
@@ -39,12 +43,15 @@ export class AuthService {
   }
 
   /**
-   * Sign in a user
-   * @param user - The user info
-   * @returns The user info and access token
+   * Signs in a user.
+   * @param user - The user information.
+   * @returns A promise that resolves to the user info and access token.
    */
   async signIn(user: User): Promise<AuthDto> {
-    const accessToken = await this.generateToken(user.id, user.username);
+    const accessToken: string = await this.generateToken(
+      user.id,
+      user.username,
+    );
 
     return {
       id: user.id,
@@ -54,13 +61,13 @@ export class AuthService {
   }
 
   /**
-   * Validate a user who is trying to sign in
-   * @param username - The username of the user
-   * @param password - The password of the user
-   * @returns The user info and access
+   * Validates a user attempting to sign in.
+   * @param username - The username of the user.
+   * @param password - The password of the user.
+   * @returns A promise that resolves to the user object if validation is successful, or null if not.
    */
   async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(username);
+    const user: User | null = await this.userService.findOne(username);
 
     if (!user.password) return null;
 
@@ -75,9 +82,9 @@ export class AuthService {
   }
 
   /**
-   * Sign in a user using Google OAuth and create a new user if they don't exist
-   * @param request - The request object
-   * @returns The user info and access token
+   * Sign in a user using Google OAuth and create a new user if they don't exist.
+   * @param request - The request object containing user information.
+   * @returns A promise that resolves to the user info and access token.
    */
   async googleSignIn(request): Promise<any> {
     if (!request.user) {
@@ -85,7 +92,7 @@ export class AuthService {
     }
 
     const { email: username } = request.user;
-    let user = await this.userService.findOne(username);
+    let user: User | null = await this.userService.findOne(username);
 
     if (!user) {
       user = await this.userService.createUserOauth(request.user);
@@ -95,18 +102,23 @@ export class AuthService {
   }
 
   /**
-   * Send a reset password email
-   * @param email The email to send the reset password email to
-   * @returns Whether the email was sent successfully
+   * Sends a password reset email to the user.
+   * @param email - The email address of the user requesting the password reset.
+   * @returns A promise that resolves to a message indicating the status of the request.
+   * @throws BadRequestException if the user does not exist.
    */
   async requestPasswordReset(email: string): Promise<{ message: string }> {
-    const user = await this.userService.findOne(email);
+    const user: User | null = await this.userService.findOne(email);
 
     if (!user) {
       throw new BadRequestException('User does not exist');
     }
 
-    const resetToken = await this.generateToken(user.id, user.username, '1h');
+    const resetToken: string = await this.generateToken(
+      user.id,
+      user.username,
+      '1h',
+    );
 
     user.resetPasswordToken = await this.passwordService.encode(resetToken);
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
@@ -125,18 +137,19 @@ export class AuthService {
   }
 
   /**
-   * Reset a user's password
-   * @param username - The username of the user
-   * @param newPassword - The new password
-   * @param resetToken - The reset token
-   * @returns A message indicating whether the password was reset successfully
+   * Reset a user's password.
+   * @param username - The username of the user.
+   * @param newPassword - The new password.
+   * @param resetToken - The reset token.
+   * @throws BadRequestException if the reset token is invalid or expired.
+   * @returns A promise that resolves to a message indicating whether the password was reset successfully.
    */
   async resetPassword(
     username: string,
     newPassword: string,
     resetToken: string,
   ): Promise<{ message: string }> {
-    const user = await this.userService.findOne(username);
+    const user: User | null = await this.userService.findOne(username);
 
     // if no token created in db
     if (!user.resetPasswordExpires) {
@@ -164,10 +177,11 @@ export class AuthService {
   }
 
   /**
-   * Generate a jwt token
-   * @param id - The user id
-   * @param username - The username of the user
-   * @returns generated token
+   * Generate a JWT token.
+   * @param id - The user id.
+   * @param username - The username of the user.
+   * @param expireIn - Optional expiration time for the token.
+   * @returns A promise that resolves to the generated token.
    */
   private async generateToken(
     id: number,

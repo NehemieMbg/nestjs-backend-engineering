@@ -9,6 +9,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super();
   }
 
+  /**
+   * Validate the user credentials.
+   * @param username - The username provided by the user.
+   * @param password - The password provided by the user.
+   * @returns A promise that resolves to the user object if validation is successful.
+   * @throws UnauthorizedException if the credentials are incorrect.
+   */
   async validate(username: string, password: string): Promise<any> {
     const user = await this.authService.validateUser(username, password);
     if (!user) {

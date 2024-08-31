@@ -21,8 +21,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * Register a new user
-   * @param body - User data
+   * Register a new user.
+   * @param body - The user data for registration.
+   * @returns A promise that resolves to the authenticated user data transfer object.
    */
   @Post('/sign-up')
   @Serialize(AuthDto)
@@ -31,8 +32,9 @@ export class AuthController {
   }
 
   /**
-   * Login a user
-   * @param request - Request object
+   * Login a user.
+   * @param request - The request object containing user information.
+   * @returns A promise that resolves to the authenticated user data transfer object.
    */
   @Post('/sign-in')
   @UseGuards(LocalAuthGuard)
@@ -41,8 +43,9 @@ export class AuthController {
   }
 
   /**
-   * Get the current user
-   * @param request - Request object
+   * Get the current user profile.
+   * @param request - The request object containing user information.
+   * @returns The current authenticated user.
    */
   @Get('/me')
   @UseGuards(JwtAuthGuard)
@@ -58,8 +61,9 @@ export class AuthController {
   async googleAuth() {}
 
   /**
-   * Callback for the Google OAuth2 login flow
-   * @param request - Request object
+   * Callback for the Google OAuth2 login flow.
+   * @param request - The request object containing user information.
+   * @returns The authenticated user data.
    */
   @Get('/google-redirect')
   @UseGuards(GoogleOAuthGuard)
@@ -67,6 +71,11 @@ export class AuthController {
     return this.authService.googleSignIn(request);
   }
 
+  /**
+   * Request a password reset.
+   * @param body - The request body containing the email.
+   * @returns A promise that resolves to a message indicating the result of the request.
+   */
   @Post('/request-password-reset')
   async requestPasswordReset(
     @Body() body: RequestPasswordResetDto,
@@ -74,6 +83,12 @@ export class AuthController {
     return await this.authService.requestPasswordReset(body.email);
   }
 
+  /**
+   * Reset the user's password.
+   * @param request - The request object containing user information.
+   * @param body - The request body containing the new password and reset token.
+   * @returns A promise that resolves to a message indicating the result of the password reset.
+   */
   @Post('/reset-password')
   @UseGuards(JwtAuthGuard)
   async resetPassword(

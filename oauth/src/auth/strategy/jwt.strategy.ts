@@ -26,6 +26,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * Validate the JWT payload and return the user object.
+   * @param payload - The JWT payload containing user information.
+   * @returns A promise that resolves to the user object.
+   */
   async validate(payload: JwtPayload): Promise<UserObject> {
     const user = await this.userService.findOne(payload.username);
 

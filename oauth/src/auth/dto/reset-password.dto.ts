@@ -1,5 +1,8 @@
 import { IsString, MinLength } from 'class-validator';
 
+/**
+ * Data Transfer Object for resetting a password.
+ */
 export class ResetPasswordDto {
   @IsString()
   resetToken: string;

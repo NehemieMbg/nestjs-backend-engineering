@@ -15,18 +15,18 @@ export class UsersService {
   ) {}
 
   /**
-   * Create a new user
-   * @param body - The user data
-   * @return The created user
+   * Creates a new user.
+   * @param body - The user data.
+   * @returns A promise that resolves to the created user, or null if the user already exists.
    */
   async createUser(body: CreateUserDto): Promise<User | null> {
-    const existingUser = await this.findOne(body.username);
+    const existingUser: User | null = await this.findOne(body.username);
 
     if (existingUser) {
       return null;
     }
 
-    const user = await this.userRepository.create(
+    const user: User = await this.userRepository.create(
       new User(
         body.firstName,
         body.lastName,
@@ -40,18 +40,18 @@ export class UsersService {
   }
 
   /**
-   * Create a new user using OAuth
-   * @param body - The user data
-   * @return The created user
+   * Creates a new user using OAuth.
+   * @param body - The user data from the OAuth provider.
+   * @returns A promise that resolves to the created user, or null if the user already exists.
    */
   async createUserOauth(body: GoogleAuthDto): Promise<User | null> {
-    const existingUser = await this.findOne(body.email);
+    const existingUser: User | null = await this.findOne(body.email);
 
     if (existingUser) {
       return null;
     }
 
-    const user = await this.userRepository.create(
+    const user: User = await this.userRepository.create(
       new User(body.firstName, body.lastName, body.email),
     );
 
@@ -61,22 +61,22 @@ export class UsersService {
   }
 
   /**
-   * Find a user by username
-   * @param username - The username
-   * @return The user
+   * Finds a user by their username.
+   * @param username - The username of the user to find.
+   * @returns A promise that resolves to the user object if found, or null if not found.
    */
-  async findOne(username: string) {
+  async findOne(username: string): Promise<User | null> {
     return await this.userRepository.findOne({
       where: { username },
     });
   }
 
   /**
-   * Sate given user to the database
-   * @param user - The user object to be saved
-   * @returns The updated user
+   * Saves the given user to the database.
+   * @param user - The user object to be saved.
+   * @returns A promise that resolves to the updated user.
    */
-  async saveUser(user: User) {
-    return await this.userRepository.save(user);
+  async saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 }

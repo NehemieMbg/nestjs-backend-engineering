@@ -3,6 +3,9 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import * as process from 'node:process';
 
+/**
+ * Represents a Google user profile.
+ */
 export interface GoogleProfile {
   id: string;
   displayName: string;

@@ -1,5 +1,8 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
+/**
+ * Data transfer object for creating a new user
+ */
 export class CreateUserDto {
   @IsString({
     message: 'First name is required',
