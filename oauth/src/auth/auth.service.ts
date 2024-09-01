@@ -66,7 +66,7 @@ export class AuthService {
    * @param password - The password of the user.
    * @returns A promise that resolves to the user object if validation is successful, or null if not.
    */
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(username: string, password: string): Promise<User | null> {
     const user: User | null = await this.userService.findOne(username);
 
     if (!user.password) return null;

@@ -8,6 +8,7 @@ import { GoogleAuthDto } from './dto/google-auth.dto';
 import { PasswordService } from '../users/password.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthDto } from './dto/auth.dto';
+import { BadRequestException } from '@nestjs/common';
 
 const generateId = (): number => Math.floor(Math.random() * 99999);
 
@@ -38,6 +39,7 @@ const fakeEmailService: Partial<EmailService> = {
     return;
   },
 };
+
 describe('AuthService', () => {
   let users: User[];
   let service: AuthService;
@@ -125,23 +127,123 @@ describe('AuthService', () => {
 
   describe('signup', () => {
     it('should create a new user', async () => {
-      const result: AuthDto = await service.signup(dummyUser);
+      const user: AuthDto = await service.signup(dummyUser);
 
-      expect(result).toBeDefined();
-      expect(result.id).toBeDefined();
-      expect(result.username).toEqual(dummyUser.username);
+      expect(user).toBeDefined();
+      expect(user.id).toBeDefined();
+      expect(user.username).toEqual(dummyUser.username);
+    });
+
+    it('should throw an exception if a user already exist', async () => {
+      await service.signup(dummyUser);
+
+      await expect(service.signup(dummyUser)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
-  describe('signIn', () => {});
+  describe('signIn', () => {
+    it('should return a valid auth object', async () => {
+      const user: User = new User(
+        dummyUser.firstName,
+        dummyUser.lastName,
+        dummyUser.username,
+        dummyUser.password,
+      );
+      user.id = 1;
 
-  describe('googleSignIn', () => {});
+      const userSignedIn: AuthDto = await service.signIn(user);
 
-  describe('validateUser', () => {});
+      expect(userSignedIn.id).toBeDefined();
+      expect(userSignedIn.accessToken).toBeDefined();
+      expect(userSignedIn.username).toEqual(user.username);
+    });
+  });
 
-  describe('generateToken', () => {});
+  describe('googleSignIn', () => {
+    it('should return null if user is not provided in the request object', async () => {
+      await expect(service.googleSignIn({})).resolves.toBeNull();
+    });
 
-  describe('requestPasswordReset', () => {});
+    it('should return a valid auth object using oauth with an existing user', async () => {
+      const existingUser: User = { id: 1, ...dummyUser, password: null };
+      users.push(existingUser);
 
-  describe('resetPassword', () => {});
+      const request = {
+        user: {
+          email: existingUser.username,
+        },
+      };
+
+      const authenticatedUser = await service.googleSignIn(request);
+
+      expect(authenticatedUser.id).toBeDefined();
+      expect(authenticatedUser.accessToken).toBeDefined();
+      expect(authenticatedUser.username).toEqual(existingUser.username);
+    });
+
+    it('should return a valid auth object using oauth with no existing user', async () => {
+      const newUser: Partial<GoogleAuthDto> = {
+        firstName: dummyUser.firstName,
+        lastName: dummyUser.lastName,
+        email: dummyUser.username,
+      };
+
+      const authenticatedUser = await service.googleSignIn({ user: newUser });
+
+      expect(authenticatedUser.id).toBeDefined();
+      expect(authenticatedUser.accessToken).toBeDefined();
+      expect(authenticatedUser.username).toEqual(newUser.email);
+    });
+  });
+
+  describe('validateUser', () => {
+    it('should return a valid user object using the correct credentials', async () => {
+      users.push({ id: generateId(), ...dummyUser });
+      const user: User | null = await service.validateUser(
+        dummyUser.username,
+        dummyUser.password,
+      );
+
+      expect(user).toBeDefined();
+      expect(user.id).toBeDefined();
+      expect(user.username).toEqual(dummyUser.username);
+    });
+
+    it('should return null if wrong password is provided', async () => {
+      users.push({ id: generateId(), ...dummyUser });
+      const user: User | null = await service.validateUser(
+        dummyUser.username,
+        'wrongpassword',
+      );
+
+      expect(user).toBeNull();
+    });
+  });
+
+  describe('requestPasswordReset', () => {
+    it('should accept the reset request', async () => {
+      users.push({ id: generateId(), ...dummyUser });
+      const response: { message: string } = await service.requestPasswordReset(
+        dummyUser.username,
+      );
+
+      expect(response.message).toBeDefined();
+    });
+
+    it('should throw a BadRequestException if user is not found', async () => {
+      await expect(
+        service.requestPasswordReset('test@test.com'),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset the user password', async () => {});
+
+    it('should throw if invalid token provided', async () => {});
+
+    it('should throw if the provided token has expired', async () => {});
+  });
 });
