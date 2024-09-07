@@ -3,6 +3,16 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import * as process from 'node:process';
 import { UsersService } from '../../users/users.service';
+import { User } from '../../users/user.entity';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
 
 interface JwtPayload {
   sub: string;
@@ -32,7 +42,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns A promise that resolves to the user object.
    */
   async validate(payload: JwtPayload): Promise<UserObject> {
-    const user = await this.userService.findOne(payload.username);
+    const user: User | null = await this.userService.findOne(payload.username);
 
     return {
       userId: payload.sub,
